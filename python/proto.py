@@ -1,28 +1,42 @@
 import inspect
 from types import FunctionType, MethodType, ClassType
 
-def _isprocess(m):
-    if isinstance(m, FunctionType) or  isinstance(m, MethodType):
-        return hasattr(m, "__protonode__") and m.__protonode__ == 'process'
-    return False
+class Process:
+    deps = []
 
-def _istask(cls):
-    if isinstance(cls, ClassType):
-        return hasattr(cls, "__protonode__") and cls.__protonode__ == 'task'
-    return False
+class Task:
+    pass
 
 def buildtree(task):
-    task.__protonode__ = 'task'        
     task.processlist = [i for i in task.__dict__.values() if _isprocess(i)]
     task.tasklist = [i for i in task.__dict__.values() if _istask(i)]
 
 def task(clz):
+    clz.__protonode__ = Task()
     buildtree(clz)
-    clz.__protonode__ = 'task'
     return clz
 
 def process(fn):
-    print "h1"
+    fn.__process__ = Process()
     fn.__protonode__ = 'process'
     return fn
 
+def leads(fn, trailer, condition="QUEUQ"):
+    dep = (trailer, condition)
+    fn.__process__.deps.append(dep)
+    return fn
+    
+def trails(fn, leader, condition="DONE"):
+    dep = (leader, condition)
+    fn.__process__.deps.append(dep)
+    return fn
+
+def _isprocess(m):
+    if isinstance(m, FunctionType) or  isinstance(m, MethodType):
+        return hasattr(m, "__protonode__") and isinstance(m.__protonode__, Process)
+    return False
+
+def _istask(clz):
+    if isinstance(clz, ClassType):
+        return hasattr(clz, "__protonode__") and isinstance(clz.__protonode__, Task)
+    return False
