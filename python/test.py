@@ -1,7 +1,8 @@
-from proto import Task, process
+from proto import process, task
 
-class HelloWorld(Task):
-
+@task
+class HelloWorld:
+    
     @process
     def helloWorldProcess():
         print "hello world"

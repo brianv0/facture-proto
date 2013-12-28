@@ -1,12 +1,13 @@
-from proto import Task, Process
+from proto import task, process
 
-class Hello(Task):
-
+@task
+class Hello:
     @process
     def helloProcess():
         print "hello"
 
-    class World(Task):
+    @task
+    class World:
         @process
         def worldProcess():
             print "world"
